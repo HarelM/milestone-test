@@ -13,15 +13,15 @@ jobs:
         with:
           milestone_name: 'Next Release'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
 
       - name: Rename closed milestone to version
         uses: octokit/request-action@v2.x
         with:
           route: PATCH /repos/${{ github.repository }}/milestones/${{ steps.close_milestone.outputs.milestone_id }}
-          title: ${{ github.event.inputs.new_version }}
+          title: Version 123
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
 
       - name: Output renamed milestone URL
         run: |
@@ -33,4 +33,4 @@ jobs:
           title: 'Next Release'
           description: ${{ github.event.inputs.new_milestone_description }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
