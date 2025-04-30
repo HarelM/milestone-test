@@ -27,9 +27,8 @@ jobs:
         uses: octokit/request-action@v2.x
         with:
           route: PATCH /repos/${{ github.repository }}/milestones/${{ steps.extract.outputs.milestone_id }}
-          parameters: |
-            title: "New Version"
-            state: closed
+          title: "New Version"
+          state: closed
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
 
@@ -41,8 +40,6 @@ jobs:
         uses: octokit/request-action@v2.x
         with:
           route: POST /repos/${{ github.repository }}/milestones
-          parameters: |
-            title: Next Release
-            description: ${{ github.event.inputs.new_milestone_description }}
+          title: Next Release
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
