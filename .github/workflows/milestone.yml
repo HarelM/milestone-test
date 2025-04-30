@@ -17,13 +17,25 @@ jobs:
         id: date
         run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
-      - name: Find "Next Release" milestone
-        id: find-milestone
-        uses: WyriHaximus/github-action-get-milestone@v1
-        with:
-          title: 'Next Release'
+      - name: Get milestones
+        id: get-milestones
+        uses: WyriHaximus/github-action-get-milestones@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Find "Next Release" milestone
+        id: find-milestone
+        run: |
+          echo "${{ steps.get-milestones.outputs.milestones }}" > milestones.json
+          MILESTONE_NUMBER=$(jq -r '.[] | select(.title == "Next Release") | .number' milestones.json)
+          if [ -n "$MILESTONE_NUMBER" ]; then
+            echo "Found 'Next Release' milestone with number: $MILESTONE_NUMBER"
+            echo "number=$MILESTONE_NUMBER" >> $GITHUB_OUTPUT
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "No 'Next Release' milestone found"
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Close and rename milestone
         if: steps.find-milestone.outputs.number != ''
