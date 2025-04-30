@@ -19,7 +19,7 @@ jobs:
         uses: octokit/request-action@v2.x
         with:
           route: PATCH /repos/${{ github.repository }}/milestones/${{ steps.close_milestone.outputs.milestone_id }}
-          title: Version 123
+          title: "Version 123"
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
 
