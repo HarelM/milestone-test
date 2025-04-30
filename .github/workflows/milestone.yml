@@ -6,58 +6,31 @@ on:
 jobs:
   manage-milestones:
     runs-on: ubuntu-latest
-    outputs:
-      new_milestone_url: ${{ steps.create-milestone.outputs.url }}
-      new_milestone_number: ${{ steps.create-milestone.outputs.number }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Get current date
-        id: date
-        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-
-      - name: Get milestones
-        id: get-milestones
-        uses: WyriHaximus/github-action-get-milestones@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Find "Next Release" milestone
-        id: find-milestone
-        run: |
-          echo "${{ steps.get-milestones.outputs.milestones }}" > milestones.json
-          MILESTONE_NUMBER=$(jq -r '.[] | select(.title == "Next Release") | .number' milestones.json)
-          if [ -n "$MILESTONE_NUMBER" ]; then
-            echo "Found 'Next Release' milestone with number: $MILESTONE_NUMBER"
-            echo "number=$MILESTONE_NUMBER" >> $GITHUB_OUTPUT
-            echo "found=true" >> $GITHUB_OUTPUT
-          else
-            echo "No 'Next Release' milestone found"
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Close and rename milestone
-        if: steps.find-milestone.outputs.number != ''
-        uses: WyriHaximus/github-action-close-milestone@v1
+      - name: Close "Next Release" milestone
+        id: close_milestone
+        uses: Akkjon/close-milestone@v1
         with:
-          number: ${{ steps.find-milestone.outputs.number }}
-          title: "Closed - version will be here"
+          milestone_name: 'Next Release'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create new milestone
-        id: create-milestone
-        uses: WyriHaximus/github-action-create-milestone@v1
+      - name: Rename closed milestone to version
+        uses: octokit/request-action@v2.x
         with:
-          title: Next Release
-          state: open
+          route: PATCH /repos/${{ github.repository }}/milestones/${{ steps.close_milestone.outputs.milestone_id }}
+          title: ${{ github.event.inputs.new_version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Output new milestone details
+
+      - name: Output renamed milestone URL
         run: |
-          echo "New milestone created:"
-          echo "URL: ${{ steps.create-milestone.outputs.url }}"
-          echo "Number: ${{ steps.create-milestone.outputs.number }}"
-          echo "HTML URL: ${{ steps.create-milestone.outputs.html_url }}"
+          echo "Renamed milestone URL: https://github.com/${{ github.repository }}/milestone/${{ steps.close_milestone.outputs.milestone_id }}"
+
+      - name: Create new "Next Release" milestone
+        uses: WyriHaximus/github-action-create-milestone@v1.1.2
+        with:
+          title: 'Next Release'
+          description: ${{ github.event.inputs.new_milestone_description }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
