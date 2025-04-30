@@ -14,12 +14,14 @@ jobs:
           milestone_name: 'Next Release'
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
-
-      - name: Rename closed milestone to version
+      - name: print
+        run: echo ${{steps.close_milestone.outputs.milestone_id}}
+      - name: Rename milestone (even if closed)
         uses: octokit/request-action@v2.x
         with:
           route: PATCH /repos/${{ github.repository }}/milestones/${{ steps.close_milestone.outputs.milestone_id }}
-          title: "Version 123"
+          parameters: |
+            title: ${{ github.event.inputs.new_version }}
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
 
