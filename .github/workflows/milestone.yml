@@ -15,7 +15,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
       - name: print
-        run: echo ${{ steps.close_milestone.outputs.milestone_id }}
+        run: |
+          echo "closed: ${{ steps.close_milestone.outputs.milestone_id }}"
       - name: Rename milestone (even if closed)
         uses: octokit/request-action@v2.x
         with:
